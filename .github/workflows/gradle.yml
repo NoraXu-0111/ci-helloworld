@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [ "master" ]
 
-  # permissions:
-  # contents: read
-
 jobs:
   build_and_test:
     name: Build and Test
@@ -24,20 +21,21 @@ jobs:
       - name: Setting Permissions
         run: chmod a+x gradlew
       - name: Build with Gradle
-        uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
+        uses: gradle/gradle-build-action@v2
         with:
           arguments: build
       - name: Test with Gradle
-        uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
+        uses: gradle/gradle-build-action@v2
         with:
           arguments: test
       - name: Run Test Coverage
         run: ./gradlew jacocoTestReport
-      - name: Jacoco
-        uses: cicirello/jacoco-badge-generator@v2.9.0
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
         with:
-          jacoco-csv-file: build/reports/jacoco/test/jacocoTestReport.csv
-          fail-if-branches-less-than: 100
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./build/reports/jacoco/test/jacocoTestReport.xml
+          fail_ci_if_error: true
 
   build_and_publish_docker_image:
     name: Publish to Docker Hub
@@ -47,8 +45,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Login to Docker Hub
-        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
       - name: Build Container image
         run: docker build -t ${{ secrets.DOCKER_REPO }}:latest .
       - name: Publish Docker image
-        run: docker push ${{ secrets.DOCKER_REPO }}
+        run: docker push ${{ secrets.DOCKER_REPO }}:latest
+
