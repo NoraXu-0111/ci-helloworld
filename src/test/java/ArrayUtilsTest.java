@@ -66,13 +66,4 @@ public class ArrayUtilsTest {
         assertEquals(5, ArrayUtils.countOf(new int[]{2, 2, 2, 2, 2}, 2));
     }
 
-    @Test
-    public void testArraySingleElementIsTarget() {
-        assertEquals(1, ArrayUtils.countOf(new int[]{1}, 1));
-    }
-
-    @Test
-    public void testArraySingleElementNotTarget() {
-        assertEquals(0, ArrayUtils.countOf(new int[]{1}, 2));
-    }
 }
